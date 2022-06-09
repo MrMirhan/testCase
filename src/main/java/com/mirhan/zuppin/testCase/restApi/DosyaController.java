@@ -3,7 +3,6 @@ package com.mirhan.zuppin.testCase.restApi;
 import java.io.IOException;
 import java.util.List;
 
-import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,18 +14,22 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.mirhan.zuppin.testCase.Business.IDosyaService;
+import com.mirhan.zuppin.testCase.Business.IMusteriService;
 import com.mirhan.zuppin.testCase.Entities.Dosya;
+import com.mirhan.zuppin.testCase.Entities.Musteri;
 
 @RestController
 @RequestMapping("/api/dosya")
 public class DosyaController {
 
 	private IDosyaService dosyaService;
-
+	private IMusteriService musteriService;
+	
 	@Autowired
-	public DosyaController(IDosyaService dosyaService) {
+	public DosyaController(IDosyaService dosyaService, IMusteriService musteriService) {
 		super();
 		this.dosyaService = dosyaService;
+		this.musteriService = musteriService;
 	}
 	
 	@GetMapping("/all")
@@ -44,6 +47,12 @@ public class DosyaController {
 	@PostMapping("/add")
 	public String add(@RequestParam(value="dosya_file", required=true) MultipartFile dosya_file, @RequestParam(value="dosya_adi", required=true) String dosya_adi, @RequestParam(value="musteri_id", required=true) int musteri_id) throws IOException {
 		byte[] bytes = dosya_file.getBytes();
+		try {
+			Musteri musteri = musteriService.getById(musteri_id);
+			musteri.getMusteri_id();
+		} catch (NullPointerException exception) {
+			return "Customer can not found!";
+		}
 	    Dosya dosya = new Dosya(0, dosya_adi, musteri_id);
 	    dosya.setDosya(bytes);
 	    dosyaService.add(dosya);
